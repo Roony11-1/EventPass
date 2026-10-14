@@ -27,10 +27,10 @@ public class Orden
     private Long id;
 
     @Column(name = "evento_id", nullable = false)
-    private Long eventoId;
+    private long eventoId;
 
     @Column(name = "comprador_id", nullable = false)
-    private Long compradorId;
+    private long compradorId;
 
     @Column(name = "ticket_id")
     private Long ticketId;
@@ -44,9 +44,10 @@ public class Orden
     @UpdateTimestamp
     private Instant updatedAt;
 
-    private Orden(Long eventoId, Long compradorId) 
+    private Orden(long eventoId, long compradorId) 
     {
         validarIds(eventoId, compradorId);
+
         this.eventoId = eventoId;
         this.compradorId = compradorId;
         this.estado = EstadoOrden.PENDIENTE_EMISION;
@@ -80,10 +81,10 @@ public class Orden
 
     private static void validarIds(Long eventoId, Long compradorId) 
     {
-        if (eventoId == null || eventoId <= 0)
-            throw new OrdenInvalidaException("eventoId es obligatorio y > 0");
+        if (eventoId <= 0)
+            throw new OrdenInvalidaException("eventoId debe ser > 0");
 
-        if (compradorId == null || compradorId <= 0)
-            throw new OrdenInvalidaException("compradorId es obligatorio y > 0");
+        if (compradorId <= 0)
+            throw new OrdenInvalidaException("compradorId debe ser > 0");
     }
 }
