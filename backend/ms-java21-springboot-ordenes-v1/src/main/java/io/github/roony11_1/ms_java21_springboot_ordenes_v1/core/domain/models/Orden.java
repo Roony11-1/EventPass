@@ -1,50 +1,32 @@
 package io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models;
 
 import java.time.Instant;
+
+import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.OrdenInvalidaException;
+import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.TransicionEstadoNoPermitidaException;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AccessLevel;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.*;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
-@Entity 
-@Table (name = "ordenes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Orden 
+public class Orden
 {
-    @Id 
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "evento_id", nullable = false)
     private long eventoId;
 
-    @Column(name = "comprador_id", nullable = false)
     private long compradorId;
 
-    @Column(name = "ticket_id")
     private Long ticketId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
     private EstadoOrden estado;
 
-    @CreationTimestamp
     private Instant createdAt;
-    @UpdateTimestamp
+
     private Instant updatedAt;
 
-    private Orden(long eventoId, long compradorId) 
+    private Orden(long eventoId, long compradorId)
     {
         validarIds(eventoId, compradorId);
 
@@ -54,12 +36,34 @@ public class Orden
         this.ticketId = null;
     }
 
-    public static Orden crear(Long eventoId, Long compradorId) 
+    public static Orden crear(Long eventoId, Long compradorId)
     {
+        if (eventoId == null)
+            throw new OrdenInvalidaException("eventoId es obligatorio");
+        if (compradorId == null)
+            throw new OrdenInvalidaException("compradorId es obligatorio");
         return new Orden(eventoId, compradorId);
     }
 
-    public void marcarEmitida(long ticketId) 
+    public static Orden rehidratar(String id, long eventoId, 
+        long compradorId, Long ticketId,
+        EstadoOrden estado, Instant createdAt, 
+        Instant updatedAt)
+    {
+        Orden o = new Orden();
+        
+        o.id = id;
+        o.eventoId = eventoId;
+        o.compradorId = compradorId;
+        o.ticketId = ticketId;
+        o.estado = estado;
+        o.createdAt = createdAt;
+        o.updatedAt = updatedAt;
+        
+        return o;
+    }
+
+    public void marcarEmitida(long ticketId)
     {
         if (!estado.puedeTransitarA(EstadoOrden.EMITIDA))
             throw new TransicionEstadoNoPermitidaException(estado, EstadoOrden.EMITIDA);
@@ -71,7 +75,7 @@ public class Orden
         this.estado = EstadoOrden.EMITIDA;
     }
 
-    public void marcarRechazada() 
+    public void marcarRechazada()
     {
         if (!estado.puedeTransitarA(EstadoOrden.RECHAZADA))
             throw new TransicionEstadoNoPermitidaException(estado, EstadoOrden.RECHAZADA);
@@ -79,7 +83,7 @@ public class Orden
         this.estado = EstadoOrden.RECHAZADA;
     }
 
-    private static void validarIds(Long eventoId, Long compradorId) 
+    private static void validarIds(long eventoId, long compradorId)
     {
         if (eventoId <= 0)
             throw new OrdenInvalidaException("eventoId debe ser > 0");
