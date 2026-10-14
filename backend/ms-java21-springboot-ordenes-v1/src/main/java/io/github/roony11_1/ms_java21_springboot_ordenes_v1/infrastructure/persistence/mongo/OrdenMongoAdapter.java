@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.application.port.out.IOrdenRepository;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models.Orden;
+import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.repository.IOrdenRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;

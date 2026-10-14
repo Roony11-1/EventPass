@@ -1,4 +1,4 @@
-package io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.application.port.out;
+package io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.repository;
 
 import java.util.List;
 import java.util.Optional;
