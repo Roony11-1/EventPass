@@ -1,5 +1,12 @@
 package io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models;
 
+import java.time.Instant;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,26 +15,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-@Entity
-@Table(name = "ordenes")
-@Data 
-@NoArgsConstructor 
-@AllArgsConstructor 
-@Builder 
-public class Orden
+@Entity 
+@Table (name = "ordenes")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Orden 
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id 
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "evento_id", nullable = false)
@@ -45,7 +41,49 @@ public class Orden
 
     @CreationTimestamp
     private Instant createdAt;
-
     @UpdateTimestamp
     private Instant updatedAt;
+
+    private Orden(Long eventoId, Long compradorId) 
+    {
+        validarIds(eventoId, compradorId);
+        this.eventoId = eventoId;
+        this.compradorId = compradorId;
+        this.estado = EstadoOrden.PENDIENTE_EMISION;
+        this.ticketId = null;
+    }
+
+    public static Orden crear(Long eventoId, Long compradorId) 
+    {
+        return new Orden(eventoId, compradorId);
+    }
+
+    public void marcarEmitida(long ticketId) 
+    {
+        if (!estado.puedeTransitarA(EstadoOrden.EMITIDA))
+            throw new TransicionEstadoNoPermitidaException(estado, EstadoOrden.EMITIDA);
+
+        if (ticketId <= 0)
+            throw new OrdenInvalidaException("ticketId debe ser > 0");
+
+        this.ticketId = ticketId;
+        this.estado = EstadoOrden.EMITIDA;
+    }
+
+    public void marcarRechazada() 
+    {
+        if (!estado.puedeTransitarA(EstadoOrden.RECHAZADA))
+            throw new TransicionEstadoNoPermitidaException(estado, EstadoOrden.RECHAZADA);
+
+        this.estado = EstadoOrden.RECHAZADA;
+    }
+
+    private static void validarIds(Long eventoId, Long compradorId) 
+    {
+        if (eventoId == null || eventoId <= 0)
+            throw new OrdenInvalidaException("eventoId es obligatorio y > 0");
+
+        if (compradorId == null || compradorId <= 0)
+            throw new OrdenInvalidaException("compradorId es obligatorio y > 0");
+    }
 }
