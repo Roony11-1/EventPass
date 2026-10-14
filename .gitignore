@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### AI agents (archivos locales, no versionar) ###
+AGENTS.md
+CLAUDE.md
+.claude/
+.opencode/
