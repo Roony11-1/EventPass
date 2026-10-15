@@ -1,8 +1,8 @@
-# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
+# Todo por el gateway. Ajusta @eventoId con el id del paso 1.
 @baseUrl = http://localhost:8080
+@eventoId = 1
 @cantidad = 5
 
-# @name crearEvento
 ### 1. Crear evento con tipos de entrada (debe dar 201)
 POST {{baseUrl}}/api/eventos
 Content-Type: application/json
@@ -23,10 +23,10 @@ Content-Type: application/json
 GET {{baseUrl}}/api/eventos
 
 ### 3. Buscar evento por id (debe dar 200)
-GET {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}
+GET {{baseUrl}}/api/eventos/{{eventoId}}
 
 ### 4. Reservar cupo (debe dar reservado=true)
-POST {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}/reservar
+POST {{baseUrl}}/api/eventos/{{eventoId}}/reservar
 Content-Type: application/json
 
 {
@@ -34,17 +34,39 @@ Content-Type: application/json
 }
 
 ### 5. Reservar cupo que excede el aforo (debe dar reservado=false)
-POST {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}/reservar
+POST {{baseUrl}}/api/eventos/{{eventoId}}/reservar
 Content-Type: application/json
 
 {
   "cantidad": 1000
 }
 
-### 6. Buscar evento inexistente (debe dar 404)
+### 6. Actualizar evento (debe dar 200 con los cambios)
+PUT {{baseUrl}}/api/eventos/{{eventoId}}
+Content-Type: application/json
+
+{
+  "nombre": "Concierto Rock en Chile (editado)",
+  "descripcion": "Festival de bandas nacionales",
+  "fecha": "2026-12-20T20:00:00",
+  "lugar": "Movistar Arena",
+  "aforoTotal": 100,
+  "tiposEntrada": [
+    { "nombre": "General", "precio": 15000 },
+    { "nombre": "VIP", "precio": 35000 }
+  ]
+}
+
+### 7. Eliminar evento (debe dar 204)
+DELETE {{baseUrl}}/api/eventos/{{eventoId}}
+
+### 8. Buscar evento eliminado (debe dar 404)
+GET {{baseUrl}}/api/eventos/{{eventoId}}
+
+### 9. Buscar evento inexistente (debe dar 404)
 GET {{baseUrl}}/api/eventos/999999
 
-### 7. Crear evento con fecha pasada (debe dar 400)
+### 10. Crear evento con fecha pasada (debe dar 400)
 POST {{baseUrl}}/api/eventos
 Content-Type: application/json
 

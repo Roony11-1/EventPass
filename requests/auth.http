@@ -1,7 +1,8 @@
-# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
+# Todo por el gateway. Ajusta @usuarioId con el id del paso 1.
+# Si el paso 1 da 409, el email ya existe: usa otro o sigue igual.
 @baseUrl = http://localhost:8080
+@usuarioId = 1
 
-# @name registro
 ### 1. Registrar usuario comprador (debe dar 201)
 POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
@@ -54,4 +55,4 @@ Content-Type: application/json
 }
 
 ### 6. Buscar usuario por id (debe dar 200)
-GET {{baseUrl}}/api/auth/usuarios/{{registro.response.body.$.id}}
+GET {{baseUrl}}/api/auth/usuarios/{{usuarioId}}
