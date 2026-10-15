@@ -1,5 +1,9 @@
+@baseUrl = http://localhost:8080
+@eventoId = 1
+@cantidad = 5
+
 ### Crear evento con tipos de entrada
-POST http://localhost:8082/api/eventos
+POST {{baseUrl}}/api/eventos
 Content-Type: application/json
 
 {
@@ -15,21 +19,21 @@ Content-Type: application/json
 }
 
 ### Listar eventos
-GET http://localhost:8082/api/eventos
+GET {{baseUrl}}/api/eventos
 
 ### Buscar evento por id
-GET http://localhost:8082/api/eventos/1
+GET {{baseUrl}}/api/eventos/{{eventoId}}
 
 ### Reservar cupo (debe funcionar)
-POST http://localhost:8082/api/eventos/1/reservar
+POST {{baseUrl}}/api/eventos/{{eventoId}}/reservar
 Content-Type: application/json
 
 {
-  "cantidad": 5
+  "cantidad": {{cantidad}}
 }
 
 ### Reservar cupo que excede el aforo disponible (debe dar reservado=false)
-POST http://localhost:8082/api/eventos/1/reservar
+POST {{baseUrl}}/api/eventos/{{eventoId}}/reservar
 Content-Type: application/json
 
 {
@@ -37,10 +41,10 @@ Content-Type: application/json
 }
 
 ### Buscar evento inexistente (debe dar 404)
-GET http://localhost:8082/api/eventos/999
+GET {{baseUrl}}/api/eventos/999
 
 ### Crear evento con fecha pasada (debe dar 400)
-POST http://localhost:8082/api/eventos
+POST {{baseUrl}}/api/eventos
 Content-Type: application/json
 
 {

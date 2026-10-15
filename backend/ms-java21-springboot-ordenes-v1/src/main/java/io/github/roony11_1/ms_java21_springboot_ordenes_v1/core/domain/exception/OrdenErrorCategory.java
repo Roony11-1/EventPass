@@ -6,7 +6,9 @@ public enum OrdenErrorCategory implements  ErrorCategory
 {
     NOT_FOUND("Orden no encontrada"),
     INVALID("Orden inválida"),
-    STATE_CONFLICT("Transición de estado no permitida");
+    STATE_CONFLICT("Transición de estado no permitida"),
+    CONFLICT("Conflicto de stock o concurrencia"),
+    INTEGRATION_UNAVAILABLE("Dependencia no disponible");
 
     private final String description;
     OrdenErrorCategory(String description) { this.description = description; }

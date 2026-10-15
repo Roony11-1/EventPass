@@ -1,0 +1,58 @@
+# Todo pasa por el gateway (único puerto publicado)
+@baseUrl = http://localhost:8080
+@eventoId = 1
+@compradorId = 10
+@ordenId = PEGAR_ID_DE_LA_ORDEN_CREADA
+
+### Crear orden multi-item con stock suficiente (debe dar 200)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{eventoId}},
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 2 },
+    { "tipoEntradaId": 2, "cantidad": 1 }
+  ]
+}
+
+### Ver orden por id (debe dar 200)
+GET {{baseUrl}}/api/v1/ordenes/{{ordenId}}
+
+### Ver orden inexistente (debe dar 404 ORD-404)
+GET {{baseUrl}}/api/v1/ordenes/000000000000000000000000
+
+### Crear orden sin stock suficiente (debe dar 409 ORD-409)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{eventoId}},
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 1000 }
+  ]
+}
+
+### Crear orden de evento inexistente (debe dar 404 ORD-404)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": 999,
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 1 }
+  ]
+}
+
+### Crear orden con items vacios (debe dar 400)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{eventoId}},
+  "compradorId": {{compradorId}},
+  "items": []
+}

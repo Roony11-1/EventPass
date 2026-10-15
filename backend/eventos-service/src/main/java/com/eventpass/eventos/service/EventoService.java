@@ -5,6 +5,7 @@ import com.eventpass.eventos.model.Evento;
 import com.eventpass.eventos.model.TipoEntrada;
 import com.eventpass.eventos.repository.EventoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +64,13 @@ public class EventoService {
         }
 
         evento.setAforoDisponible(evento.getAforoDisponible() - request.getCantidad());
-        eventoRepository.save(evento);
+
+        try {
+            eventoRepository.saveAndFlush(evento);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            Integer aforoActual = buscarEntidadPorId(id).getAforoDisponible();
+            return new ReservaResponse(false, aforoActual);
+        }
 
         return new ReservaResponse(true, evento.getAforoDisponible());
     }

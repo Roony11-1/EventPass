@@ -1,5 +1,7 @@
+@baseUrl = http://localhost:8080
+
 ### Registrar usuario comprador
-POST http://localhost:8081/api/auth/registro
+POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
 {
@@ -10,7 +12,7 @@ Content-Type: application/json
 }
 
 ### Registrar usuario staff
-POST http://localhost:8081/api/auth/registro
+POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
 {
@@ -22,7 +24,7 @@ Content-Type: application/json
 
 
 ### Login correcto
-POST http://localhost:8081/api/auth/login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -31,7 +33,7 @@ Content-Type: application/json
 }
 
 ### Login con contraseña incorrecta (debe dar error)
-POST http://localhost:8081/api/auth/login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -40,7 +42,7 @@ Content-Type: application/json
 }
 
 ### Registrar con email duplicado (debe dar error)
-POST http://localhost:8081/api/auth/registro
+POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
 {
@@ -51,4 +53,4 @@ Content-Type: application/json
 }
 
 ### Buscar usuario por id
-GET http://localhost:8081/api/auth/usuarios/1
+GET {{baseUrl}}/api/auth/usuarios/1
