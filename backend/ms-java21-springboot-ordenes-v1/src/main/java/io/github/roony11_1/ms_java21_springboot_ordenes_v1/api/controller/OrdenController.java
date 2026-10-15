@@ -37,7 +37,7 @@ public class OrdenController
         .eventoId(orden.getEventoId())
         .compradorId(orden.getCompradorId())
         .items(orden.getItems().stream().map(itemMapper::apply).toList())
-        .ticketId(orden.getTicketId())
+        .ticketIds(orden.getTicketIds())
         .estado(orden.getEstado())
         .createdAt(orden.getCreatedAt())
         .updatedAt(orden.getUpdatedAt())
@@ -52,7 +52,7 @@ public class OrdenController
             request.getCompradorId(),
             request.getItems().stream().map(this::aDominio).toList());
 
-        return ResponseEntity.ok(mapper.apply(orden));
+        return ResponseEntity.accepted().body(mapper.apply(orden));
     }
 
     @GetMapping("/{id}")

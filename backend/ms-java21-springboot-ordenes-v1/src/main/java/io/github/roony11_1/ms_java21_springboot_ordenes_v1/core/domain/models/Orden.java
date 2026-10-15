@@ -23,7 +23,7 @@ public class Orden
 
     private List<ItemOrden> items;
 
-    private Long ticketId;
+    private List<String> ticketIds;
 
     private EstadoOrden estado;
 
@@ -47,7 +47,7 @@ public class Orden
         this.compradorId = compradorId;
         this.items = new ArrayList<>(items);
         this.estado = EstadoOrden.PENDIENTE_EMISION;
-        this.ticketId = null;
+        this.ticketIds = new ArrayList<>();
     }
 
     public static Orden crear(Long eventoId, Long compradorId, List<ItemOrden> items)
@@ -62,7 +62,7 @@ public class Orden
     }
 
     public static Orden rehidratar(String id, long eventoId,
-        long compradorId, List<ItemOrden> items, Long ticketId,
+        long compradorId, List<ItemOrden> items, List<String> ticketIds,
         EstadoOrden estado, Instant createdAt,
         Instant updatedAt, Long version)
     {
@@ -72,13 +72,18 @@ public class Orden
         o.eventoId = eventoId;
         o.compradorId = compradorId;
         o.items = items == null ? new ArrayList<>() : new ArrayList<>(items);
-        o.ticketId = ticketId;
+        o.ticketIds = ticketIds == null ? new ArrayList<>() : new ArrayList<>(ticketIds);
         o.estado = estado;
         o.createdAt = createdAt;
         o.updatedAt = updatedAt;
         o.version = version;
 
         return o;
+    }
+
+    public List<String> getTicketIds()
+    {
+        return Collections.unmodifiableList(ticketIds);
     }
 
     public List<ItemOrden> getItems()
@@ -91,15 +96,15 @@ public class Orden
         return items.stream().mapToInt(ItemOrden::getCantidad).sum();
     }
 
-    public void marcarEmitida(long ticketId)
+    public void marcarEmitida(List<String> ticketIds)
     {
         if (!estado.puedeTransitarA(EstadoOrden.EMITIDA))
             throw new TransicionEstadoNoPermitidaException(estado, EstadoOrden.EMITIDA);
 
-        if (ticketId <= 0)
-            throw new OrdenInvalidaException("ticketId debe ser > 0");
+        if (ticketIds == null || ticketIds.isEmpty())
+            throw new OrdenInvalidaException("ticketIds es obligatorio");
 
-        this.ticketId = ticketId;
+        this.ticketIds = new ArrayList<>(ticketIds);
         this.estado = EstadoOrden.EMITIDA;
     }
 

@@ -1,8 +1,9 @@
+# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
 @baseUrl = http://localhost:8080
-@eventoId = 1
 @cantidad = 5
 
-### Crear evento con tipos de entrada
+# @name crearEvento
+### 1. Crear evento con tipos de entrada (debe dar 201)
 POST {{baseUrl}}/api/eventos
 Content-Type: application/json
 
@@ -18,32 +19,32 @@ Content-Type: application/json
   ]
 }
 
-### Listar eventos
+### 2. Listar eventos (debe dar 200)
 GET {{baseUrl}}/api/eventos
 
-### Buscar evento por id
-GET {{baseUrl}}/api/eventos/{{eventoId}}
+### 3. Buscar evento por id (debe dar 200)
+GET {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}
 
-### Reservar cupo (debe funcionar)
-POST {{baseUrl}}/api/eventos/{{eventoId}}/reservar
+### 4. Reservar cupo (debe dar reservado=true)
+POST {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}/reservar
 Content-Type: application/json
 
 {
   "cantidad": {{cantidad}}
 }
 
-### Reservar cupo que excede el aforo disponible (debe dar reservado=false)
-POST {{baseUrl}}/api/eventos/{{eventoId}}/reservar
+### 5. Reservar cupo que excede el aforo (debe dar reservado=false)
+POST {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}/reservar
 Content-Type: application/json
 
 {
   "cantidad": 1000
 }
 
-### Buscar evento inexistente (debe dar 404)
-GET {{baseUrl}}/api/eventos/999
+### 6. Buscar evento inexistente (debe dar 404)
+GET {{baseUrl}}/api/eventos/999999
 
-### Crear evento con fecha pasada (debe dar 400)
+### 7. Crear evento con fecha pasada (debe dar 400)
 POST {{baseUrl}}/api/eventos
 Content-Type: application/json
 

@@ -30,8 +30,8 @@ public class OrdenDocument
     @Field("items")
     private List<ItemOrdenDocument> items = new ArrayList<>();
 
-    @Field("ticket_id")
-    private Long ticketId;
+    @Field("ticket_ids")
+    private List<String> ticketIds = new ArrayList<>();
 
     private EstadoOrden estado;
 

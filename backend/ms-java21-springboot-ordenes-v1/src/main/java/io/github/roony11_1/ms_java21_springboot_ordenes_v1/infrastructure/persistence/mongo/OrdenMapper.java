@@ -1,5 +1,7 @@
 package io.github.roony11_1.ms_java21_springboot_ordenes_v1.infrastructure.persistence.mongo;
 
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Component;
 
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models.ItemOrden;
@@ -16,7 +18,7 @@ public final class OrdenMapper
         d.setEventoId(o.getEventoId());
         d.setCompradorId(o.getCompradorId());
         d.setItems(o.getItems().stream().map(this::aDocumentoItem).toList());
-        d.setTicketId(o.getTicketId());
+        d.setTicketIds(new ArrayList<>(o.getTicketIds()));
         d.setEstado(o.getEstado());
         d.setCreatedAt(o.getCreatedAt());
         d.setUpdatedAt(o.getUpdatedAt());
@@ -32,7 +34,7 @@ public final class OrdenMapper
                 d.getEventoId(),
                 d.getCompradorId(),
                 d.getItems().stream().map(this::aDominioItem).toList(),
-                d.getTicketId(),
+                new ArrayList<>(d.getTicketIds()),
                 d.getEstado(),
                 d.getCreatedAt(),
                 d.getUpdatedAt(),

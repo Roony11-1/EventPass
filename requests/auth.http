@@ -1,6 +1,8 @@
+# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
 @baseUrl = http://localhost:8080
 
-### Registrar usuario comprador
+# @name registro
+### 1. Registrar usuario comprador (debe dar 201)
 POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
@@ -11,7 +13,7 @@ Content-Type: application/json
   "rol": "COMPRADOR"
 }
 
-### Registrar usuario staff
+### 2. Registrar usuario staff (debe dar 201)
 POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
@@ -22,8 +24,7 @@ Content-Type: application/json
   "rol": "STAFF"
 }
 
-
-### Login correcto
+### 3. Login correcto (debe dar 200 con token)
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -32,7 +33,7 @@ Content-Type: application/json
   "password": "123456"
 }
 
-### Login con contraseña incorrecta (debe dar error)
+### 4. Login con contraseña incorrecta (debe dar error)
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
@@ -41,7 +42,7 @@ Content-Type: application/json
   "password": "clave-mala"
 }
 
-### Registrar con email duplicado (debe dar error)
+### 5. Registrar con email duplicado (debe dar error)
 POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
@@ -52,5 +53,5 @@ Content-Type: application/json
   "rol": "COMPRADOR"
 }
 
-### Buscar usuario por id
-GET {{baseUrl}}/api/auth/usuarios/1
+### 6. Buscar usuario por id (debe dar 200)
+GET {{baseUrl}}/api/auth/usuarios/{{registro.response.body.$.id}}

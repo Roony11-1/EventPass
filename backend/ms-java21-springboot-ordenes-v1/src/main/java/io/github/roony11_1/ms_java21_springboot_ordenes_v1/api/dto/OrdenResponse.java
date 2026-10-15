@@ -21,7 +21,7 @@ public class OrdenResponse
     private long eventoId;
     private long compradorId;
     private List<ItemOrdenResponse> items;
-    private Long ticketId;
+    private List<String> ticketIds;
     private EstadoOrden estado;
     private Instant createdAt;
     private Instant updatedAt;
