@@ -37,7 +37,7 @@ services:
     image: postgres:16
     container_name: eventpass-postgres-eventos
     ports:
-      - "${EVENTOS_DB_PORT}:${EVENTOS_DB_PORT}"
+      - "${EVENTOS_DB_PORT}:5432"
     environment:
       POSTGRES_DB: ${EVENTOS_DB_NAME}
       POSTGRES_USER: ${EVENTOS_DB_USER}

@@ -36,6 +36,18 @@ public class EventoController {
         return ResponseEntity.ok(eventoService.buscarPorId(id));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<EventoResponse> actualizar(@PathVariable Long id,
+                                                       @Valid @RequestBody EventoRequest request) {
+        return ResponseEntity.ok(eventoService.actualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        eventoService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/reservar")
     public ResponseEntity<ReservaResponse> reservar(@PathVariable Long id,
                                                       @Valid @RequestBody ReservaRequest request) {

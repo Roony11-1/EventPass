@@ -56,6 +56,27 @@ public class EventoService {
     }
 
     @Transactional
+    public EventoResponse actualizar(Long id, EventoRequest request) {
+        Evento evento = buscarEntidadPorId(id);
+        int vendidas = evento.getAforoTotal() - evento.getAforoDisponible();
+
+        evento.setNombre(request.getNombre());
+        evento.setDescripcion(request.getDescripcion());
+        evento.setFecha(request.getFecha());
+        evento.setLugar(request.getLugar());
+        evento.setAforoTotal(request.getAforoTotal());
+        evento.setAforoDisponible(Math.max(0, request.getAforoTotal() - vendidas));
+
+        return toResponse(eventoRepository.save(evento));
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        Evento evento = buscarEntidadPorId(id);
+        eventoRepository.delete(evento);
+    }
+
+    @Transactional
     public ReservaResponse reservar(Long id, ReservaRequest request) {
         Evento evento = buscarEntidadPorId(id);
 
