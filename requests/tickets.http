@@ -1,9 +1,12 @@
-# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
-# El paso 4 es async (tickets se emiten por mensajería): si sale [], espera y reenvía.
+# Todo por el gateway. Flujo: 1 crea evento (anota el id en @eventoId),
+# 2 crea la orden (anota su id en @ordenId), 3 lista tickets (anota uno en @ticketId).
+# El paso 3 es async (mensajería): si sale [], espera unos segundos y reenvía.
 @baseUrl = http://localhost:8080
 @compradorId = 10
+@eventoId = PEGAR_ID_DEL_EVENTO_DEL_PASO_1
+@ordenId = PEGAR_ID_DE_LA_ORDEN_DEL_PASO_2
+@ticketId = PEGAR_ID_DE_UN_TICKET_DEL_PASO_3
 
-# @name crearEvento
 ### 1. Crear evento (aforo 10)
 POST {{baseUrl}}/api/eventos
 Content-Type: application/json
@@ -19,28 +22,26 @@ Content-Type: application/json
   ]
 }
 
-# @name crearOrden
-### 2. Crear orden (debe dar 200)
+### 2. Crear orden (debe dar 202)
 POST {{baseUrl}}/api/v1/ordenes
 Content-Type: application/json
 
 {
-  "eventoId": {{crearEvento.response.body.$.id}},
+  "eventoId": {{eventoId}},
   "compradorId": {{compradorId}},
   "items": [
     { "tipoEntradaId": 1, "cantidad": 2 }
   ]
 }
 
-# @name ticketsPorOrden
-### 3. Buscar tickets por orden (debe dar 200 con 2 tickets)
-GET {{baseUrl}}/api/v1/tickets/por-orden/{{crearOrden.response.body.$.id}}
+### 3. Buscar tickets por orden (debe dar 200 con los tickets)
+GET {{baseUrl}}/api/v1/tickets/por-orden/{{ordenId}}
 
 ### 4. Buscar ticket por id (debe dar 200)
-GET {{baseUrl}}/api/v1/tickets/{{ticketsPorOrden.response.body.$.[0].id}}
+GET {{baseUrl}}/api/v1/tickets/{{ticketId}}
 
 ### 5. Ver orden EMITIDA con ticketIds (debe dar 200)
-GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+GET {{baseUrl}}/api/v1/ordenes/{{ordenId}}
 
 ### 6. Buscar ticket inexistente (debe dar 404 TIC-404)
 GET {{baseUrl}}/api/v1/tickets/000000000000000000000000

@@ -1,29 +1,33 @@
+# FLUJO REAL COMPLETO vía gateway. Variables manuales: corre cada paso y
+# pega los ids donde se indica. Compatible con cualquier cliente HTTP.
+# El paso 7 es async (mensajería): si sale [], espera unos segundos y reenvía.
 @baseUrl = http://localhost:8080
 @password = 123456
+@eventoId = PEGAR_ID_DEL_EVENTO_DEL_PASO_3
+@ordenId = PEGAR_ID_DE_LA_ORDEN_DEL_PASO_4
+@ticketId = PEGAR_ID_DE_UN_TICKET_DEL_PASO_6
 
-### 1. Registrar comprador (201; email único por corrida para que sea repetible)
-# @name registro
+### 1. Registrar comprador (debe dar 201; si da 409 el email ya existe, usa otro)
 POST {{baseUrl}}/api/auth/registro
 Content-Type: application/json
 
 {
   "nombre": "Usuario E2E",
-  "email": "e2e-{{$guid}}@test.com",
+  "email": "e2e@test.com",
   "password": "{{password}}",
   "rol": "COMPRADOR"
 }
 
-### 2. Login (200 con token)
+### 2. Login (debe dar 200 con token; anota el id del usuario para @compradorId)
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "{{registro.response.body.$.email}}",
+  "email": "e2e@test.com",
   "password": "{{password}}"
 }
 
-### 3. Crear evento con 2 tipos (201)
-# @name crearEvento
+### 3. Crear evento con 2 tipos (debe dar 201)
 POST {{baseUrl}}/api/eventos
 Content-Type: application/json
 
@@ -39,14 +43,13 @@ Content-Type: application/json
   ]
 }
 
-### 4. Crear orden multi-item 2 General + 1 VIP (202, PENDIENTE_EMISION)
-# @name crearOrden
+### 4. Crear orden multi-item 2 General + 1 VIP (debe dar 202 PENDIENTE_EMISION)
 POST {{baseUrl}}/api/v1/ordenes
 Content-Type: application/json
 
 {
-  "eventoId": {{crearEvento.response.body.$.id}},
-  "compradorId": {{registro.response.body.$.id}},
+  "eventoId": {{eventoId}},
+  "compradorId": 10,
   "items": [
     { "tipoEntradaId": 1, "cantidad": 2 },
     { "tipoEntradaId": 2, "cantidad": 1 }
@@ -54,28 +57,27 @@ Content-Type: application/json
 }
 
 ### 5. Ver orden (200; primero PENDIENTE, luego EMITIDA con ticketIds)
-GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+GET {{baseUrl}}/api/v1/ordenes/{{ordenId}}
 
 ### 6. Tickets por orden (200 con 3 tickets)
-# @name ticketsPorOrden
-GET {{baseUrl}}/api/v1/tickets/por-orden/{{crearOrden.response.body.$.id}}
+GET {{baseUrl}}/api/v1/tickets/por-orden/{{ordenId}}
 
 ### 7. Ticket por id (200, EMITIDO con codigo UUID)
-GET {{baseUrl}}/api/v1/tickets/{{ticketsPorOrden.response.body.$.[0].id}}
+GET {{baseUrl}}/api/v1/tickets/{{ticketId}}
 
 ### 8. Orden EMITIDA con sus 3 ticketIds (200)
-GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+GET {{baseUrl}}/api/v1/ordenes/{{ordenId}}
 
 ### 9. Evento con aforo descontado en 3 (200)
-GET {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}
+GET {{baseUrl}}/api/eventos/{{eventoId}}
 
 ### 10. Sin stock (409 ORD-409)
 POST {{baseUrl}}/api/v1/ordenes
 Content-Type: application/json
 
 {
-  "eventoId": {{crearEvento.response.body.$.id}},
-  "compradorId": {{registro.response.body.$.id}},
+  "eventoId": {{eventoId}},
+  "compradorId": 10,
   "items": [
     { "tipoEntradaId": 1, "cantidad": 1000 }
   ]
@@ -87,7 +89,7 @@ Content-Type: application/json
 
 {
   "eventoId": 999999,
-  "compradorId": {{registro.response.body.$.id}},
+  "compradorId": 10,
   "items": [
     { "tipoEntradaId": 1, "cantidad": 1 }
   ]
@@ -98,8 +100,8 @@ POST {{baseUrl}}/api/v1/ordenes
 Content-Type: application/json
 
 {
-  "eventoId": {{crearEvento.response.body.$.id}},
-  "compradorId": {{registro.response.body.$.id}},
+  "eventoId": {{eventoId}},
+  "compradorId": 10,
   "items": []
 }
 
@@ -109,11 +111,11 @@ GET {{baseUrl}}/api/v1/ordenes/000000000000000000000000
 ### 14. Ticket inexistente (404 TIC-404)
 GET {{baseUrl}}/api/v1/tickets/000000000000000000000000
 
-### 15. Login malo (error)
+### 15. Login malo (401)
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "{{registro.response.body.$.email}}",
+  "email": "e2e@test.com",
   "password": "clave-mala"
 }
