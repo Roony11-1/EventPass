@@ -1,0 +1,74 @@
+# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
+@baseUrl = http://localhost:8080
+@compradorId = 10
+
+# @name crearEvento
+### 1. Crear evento (aforo 10)
+POST {{baseUrl}}/api/eventos
+Content-Type: application/json
+
+{
+  "nombre": "Recital E2E",
+  "descripcion": "Prueba completa",
+  "fecha": "2026-12-20T20:00:00",
+  "lugar": "Arena",
+  "aforoTotal": 10,
+  "tiposEntrada": [
+    { "nombre": "General", "precio": 15000 },
+    { "nombre": "VIP", "precio": 35000 }
+  ]
+}
+
+# @name crearOrden
+### 2. Crear orden multi-item (debe dar 202, PENDIENTE hasta que mensajería emita)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 2 },
+    { "tipoEntradaId": 2, "cantidad": 1 }
+  ]
+}
+
+### 3. Ver orden (debe dar 200; PENDIENTE y luego EMITIDA con ticketIds)
+GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+
+### 4. Crear orden sin stock suficiente (debe dar 409 ORD-409)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 1000 }
+  ]
+}
+
+### 5. Crear orden de evento inexistente (debe dar 404 ORD-404)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": 999999,
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 1 }
+  ]
+}
+
+### 6. Crear orden con items vacios (debe dar 400)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{compradorId}},
+  "items": []
+}
+
+### 7. Ver orden inexistente (debe dar 404 ORD-404)
+GET {{baseUrl}}/api/v1/ordenes/000000000000000000000000

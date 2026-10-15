@@ -38,6 +38,9 @@ public class Evento {
     @Column(nullable = false)
     private Integer aforoDisponible;
 
+    @Version
+    private Long version;
+
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TipoEntrada> tiposEntrada = new ArrayList<>();
 }

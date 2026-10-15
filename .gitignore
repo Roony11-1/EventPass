@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+# Env local (no versionar secretos como JWT_SECRET)
+.env
+
 ### AI agents (archivos locales, no versionar) ###
 AGENTS.md
 CLAUDE.md

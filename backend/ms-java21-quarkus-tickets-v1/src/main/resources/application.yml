@@ -1,0 +1,45 @@
+quarkus:
+  application:
+    name: tickets-service
+  http:
+    port: ${SERVER_PORT}
+  mongodb:
+    connection-string: ${MONGODB_URI}
+    database: eventpass_tickets
+  jackson:
+    serialization-inclusion: NON_NULL
+  index-dependency:
+    roony-error-quarkus:
+      group-id: io.github.roony11-1
+      artifact-id: roony-error-quarkus
+
+mp:
+  messaging:
+    incoming:
+      ordenes-creada:
+        connector: smallrye-rabbitmq
+        host: ${RABBITMQ_HOST}
+        port: ${RABBITMQ_PORT}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+        exchange:
+          name: eventpass
+          type: topic
+          durable: true
+        queue:
+          name: q.tickets.ordenes-creadas
+          durable: true
+        routing-keys: orden.creada
+        auto-acknowledgement: false
+    outgoing:
+      tickets-emitidos:
+        connector: smallrye-rabbitmq
+        host: ${RABBITMQ_HOST}
+        port: ${RABBITMQ_PORT}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+        exchange:
+          name: eventpass
+          type: topic
+          durable: true
+        routing-keys: tickets.emitidos

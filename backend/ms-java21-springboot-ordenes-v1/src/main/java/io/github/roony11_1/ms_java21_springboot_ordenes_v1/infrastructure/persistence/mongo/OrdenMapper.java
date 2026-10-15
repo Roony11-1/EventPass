@@ -1,7 +1,10 @@
 package io.github.roony11_1.ms_java21_springboot_ordenes_v1.infrastructure.persistence.mongo;
 
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Component;
 
+import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models.ItemOrden;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models.Orden;
 
 @Component 
@@ -14,10 +17,12 @@ public final class OrdenMapper
         d.setId(o.getId());
         d.setEventoId(o.getEventoId());
         d.setCompradorId(o.getCompradorId());
-        d.setTicketId(o.getTicketId());
+        d.setItems(o.getItems().stream().map(this::aDocumentoItem).toList());
+        d.setTicketIds(new ArrayList<>(o.getTicketIds()));
         d.setEstado(o.getEstado());
         d.setCreatedAt(o.getCreatedAt());
         d.setUpdatedAt(o.getUpdatedAt());
+        d.setVersion(o.getVersion());
 
         return d;
     }
@@ -28,9 +33,26 @@ public final class OrdenMapper
                 d.getId(),
                 d.getEventoId(),
                 d.getCompradorId(),
-                d.getTicketId(),
+                d.getItems().stream().map(this::aDominioItem).toList(),
+                new ArrayList<>(d.getTicketIds()),
                 d.getEstado(),
                 d.getCreatedAt(),
-                d.getUpdatedAt());
+                d.getUpdatedAt(),
+                d.getVersion());
+    }
+
+    private ItemOrdenDocument aDocumentoItem(ItemOrden item)
+    {
+        ItemOrdenDocument d = new ItemOrdenDocument();
+
+        d.setTipoEntradaId(item.getTipoEntradaId());
+        d.setCantidad(item.getCantidad());
+
+        return d;
+    }
+
+    private ItemOrden aDominioItem(ItemOrdenDocument d)
+    {
+        return new ItemOrden(d.getTipoEntradaId(), d.getCantidad());
     }
 }

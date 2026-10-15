@@ -15,5 +15,7 @@ public class OrdenErrorConfig
         HttpStatusRegistry.register(OrdenErrorCategory.NOT_FOUND, 404);
         HttpStatusRegistry.register(OrdenErrorCategory.INVALID, 400);
         HttpStatusRegistry.register(OrdenErrorCategory.STATE_CONFLICT, 422);
+        HttpStatusRegistry.register(OrdenErrorCategory.CONFLICT, 409);
+        HttpStatusRegistry.register(OrdenErrorCategory.INTEGRATION_UNAVAILABLE, 503);
     }
 }

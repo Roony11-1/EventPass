@@ -1,0 +1,119 @@
+@baseUrl = http://localhost:8080
+@password = 123456
+
+### 1. Registrar comprador (201; email único por corrida para que sea repetible)
+# @name registro
+POST {{baseUrl}}/api/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Usuario E2E",
+  "email": "e2e-{{$guid}}@test.com",
+  "password": "{{password}}",
+  "rol": "COMPRADOR"
+}
+
+### 2. Login (200 con token)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{registro.response.body.$.email}}",
+  "password": "{{password}}"
+}
+
+### 3. Crear evento con 2 tipos (201)
+# @name crearEvento
+POST {{baseUrl}}/api/eventos
+Content-Type: application/json
+
+{
+  "nombre": "Festival E2E",
+  "descripcion": "Flujo real completo",
+  "fecha": "2026-12-20T20:00:00",
+  "lugar": "Arena",
+  "aforoTotal": 10,
+  "tiposEntrada": [
+    { "nombre": "General", "precio": 15000 },
+    { "nombre": "VIP", "precio": 35000 }
+  ]
+}
+
+### 4. Crear orden multi-item 2 General + 1 VIP (202, PENDIENTE_EMISION)
+# @name crearOrden
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{registro.response.body.$.id}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 2 },
+    { "tipoEntradaId": 2, "cantidad": 1 }
+  ]
+}
+
+### 5. Ver orden (200; primero PENDIENTE, luego EMITIDA con ticketIds)
+GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+
+### 6. Tickets por orden (200 con 3 tickets)
+# @name ticketsPorOrden
+GET {{baseUrl}}/api/v1/tickets/por-orden/{{crearOrden.response.body.$.id}}
+
+### 7. Ticket por id (200, EMITIDO con codigo UUID)
+GET {{baseUrl}}/api/v1/tickets/{{ticketsPorOrden.response.body.$.[0].id}}
+
+### 8. Orden EMITIDA con sus 3 ticketIds (200)
+GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+
+### 9. Evento con aforo descontado en 3 (200)
+GET {{baseUrl}}/api/eventos/{{crearEvento.response.body.$.id}}
+
+### 10. Sin stock (409 ORD-409)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{registro.response.body.$.id}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 1000 }
+  ]
+}
+
+### 11. Evento inexistente (404 ORD-404)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": 999999,
+  "compradorId": {{registro.response.body.$.id}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 1 }
+  ]
+}
+
+### 12. Items vacíos (400)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{registro.response.body.$.id}},
+  "items": []
+}
+
+### 13. Orden inexistente (404 ORD-404)
+GET {{baseUrl}}/api/v1/ordenes/000000000000000000000000
+
+### 14. Ticket inexistente (404 TIC-404)
+GET {{baseUrl}}/api/v1/tickets/000000000000000000000000
+
+### 15. Login malo (error)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{registro.response.body.$.email}}",
+  "password": "clave-mala"
+}

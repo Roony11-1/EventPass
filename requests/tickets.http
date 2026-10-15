@@ -1,0 +1,46 @@
+# Prueba completa vía gateway. Corre de arriba hacia abajo, sin pegar ids.
+# El paso 4 es async (tickets se emiten por mensajería): si sale [], espera y reenvía.
+@baseUrl = http://localhost:8080
+@compradorId = 10
+
+# @name crearEvento
+### 1. Crear evento (aforo 10)
+POST {{baseUrl}}/api/eventos
+Content-Type: application/json
+
+{
+  "nombre": "Recital Tickets",
+  "descripcion": "Prueba completa",
+  "fecha": "2026-12-20T20:00:00",
+  "lugar": "Arena",
+  "aforoTotal": 10,
+  "tiposEntrada": [
+    { "nombre": "General", "precio": 15000 }
+  ]
+}
+
+# @name crearOrden
+### 2. Crear orden (debe dar 200)
+POST {{baseUrl}}/api/v1/ordenes
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "compradorId": {{compradorId}},
+  "items": [
+    { "tipoEntradaId": 1, "cantidad": 2 }
+  ]
+}
+
+# @name ticketsPorOrden
+### 3. Buscar tickets por orden (debe dar 200 con 2 tickets)
+GET {{baseUrl}}/api/v1/tickets/por-orden/{{crearOrden.response.body.$.id}}
+
+### 4. Buscar ticket por id (debe dar 200)
+GET {{baseUrl}}/api/v1/tickets/{{ticketsPorOrden.response.body.$.[0].id}}
+
+### 5. Ver orden EMITIDA con ticketIds (debe dar 200)
+GET {{baseUrl}}/api/v1/ordenes/{{crearOrden.response.body.$.id}}
+
+### 6. Buscar ticket inexistente (debe dar 404 TIC-404)
+GET {{baseUrl}}/api/v1/tickets/000000000000000000000000
