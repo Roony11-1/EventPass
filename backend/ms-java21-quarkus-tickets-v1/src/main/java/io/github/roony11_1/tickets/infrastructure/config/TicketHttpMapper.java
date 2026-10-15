@@ -17,6 +17,8 @@ public class TicketHttpMapper implements ErrorCategoryHttpMapper
             return 400;
         if (category == TicketErrorCategory.STATE_CONFLICT)
             return 422;
+        if (category == TicketErrorCategory.CONFLICT)
+            return 409;
         return 500;
     }
 }

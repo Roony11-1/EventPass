@@ -11,5 +11,7 @@ public interface ITicketRepository
 
     Optional<Ticket> buscarPorId(String id);
 
+    Optional<Ticket> buscarPorCodigo(String codigo);
+
     List<Ticket> buscarPorOrden(String ordenId);
 }

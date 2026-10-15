@@ -56,6 +56,12 @@ public class TicketMongoAdapter implements ITicketRepository
         return repository.buscarPorOrden(ordenId).stream().map(this::aDominio).toList();
     }
 
+    @Override
+    public Optional<Ticket> buscarPorCodigo(String codigo)
+    {
+        return repository.buscarPorCodigo(codigo).map(this::aDominio);
+    }
+
     private Ticket aDominio(TicketDocument d)
     {
         return Ticket.rehidratar(

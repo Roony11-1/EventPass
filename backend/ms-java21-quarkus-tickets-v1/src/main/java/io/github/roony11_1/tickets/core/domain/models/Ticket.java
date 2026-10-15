@@ -72,4 +72,12 @@ public class Ticket
 
         this.estado = TicketEstado.ANULADO;
     }
+
+    public void validar()
+    {
+        if (!estado.puedeTransitarA(TicketEstado.VALIDADO))
+            throw new TransicionEstadoNoPermitidaException(estado, TicketEstado.VALIDADO);
+
+        this.estado = TicketEstado.VALIDADO;
+    }
 }

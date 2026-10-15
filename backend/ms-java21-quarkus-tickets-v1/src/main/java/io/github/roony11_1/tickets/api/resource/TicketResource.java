@@ -6,6 +6,7 @@ import io.github.roony11_1.tickets.api.dto.TicketResponse;
 import io.github.roony11_1.tickets.core.application.service.TicketService;
 import io.github.roony11_1.tickets.core.domain.models.Ticket;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -42,6 +43,13 @@ public class TicketResource
     public Response buscarPorOrden(@PathParam("ordenId") String ordenId)
     {
         return Response.ok(ticketService.buscarPorOrden(ordenId).stream().map(mapper::apply).toList()).build();
+    }
+
+    @POST
+    @Path("/{codigo}/validar")
+    public Response validar(@PathParam("codigo") String codigo)
+    {
+        return Response.ok(mapper.apply(ticketService.validarTicket(codigo))).build();
     }
 
 }

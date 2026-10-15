@@ -1,11 +1,12 @@
 # Todo por el gateway. Flujo: 1 crea evento (anota el id en @eventoId),
-# 2 crea la orden (anota su id en @ordenId), 3 lista tickets (anota uno en @ticketId).
+# 2 crea la orden (anota su id en @ordenId), 3 lista tickets (anota codigo en @codigo).
 # El paso 3 es async (mensajería): si sale [], espera unos segundos y reenvía.
 @baseUrl = http://localhost:8080
 @compradorId = 10
 @eventoId = PEGAR_ID_DEL_EVENTO_DEL_PASO_1
 @ordenId = PEGAR_ID_DE_LA_ORDEN_DEL_PASO_2
 @ticketId = PEGAR_ID_DE_UN_TICKET_DEL_PASO_3
+@codigo = PEGAR_CODIGO_DE_UN_TICKET_DEL_PASO_3
 
 ### 1. Crear evento (aforo 10)
 POST {{baseUrl}}/api/eventos
@@ -45,3 +46,12 @@ GET {{baseUrl}}/api/v1/ordenes/{{ordenId}}
 
 ### 6. Buscar ticket inexistente (debe dar 404 TIC-404)
 GET {{baseUrl}}/api/v1/tickets/000000000000000000000000
+
+### 7. Validar ticket por codigo, rol STAFF en puerta (debe dar 200 VALIDADO)
+POST {{baseUrl}}/api/v1/tickets/{{codigo}}/validar
+
+### 8. Revalidar mismo codigo, posible doble ingreso (debe dar 409 TIC-409)
+POST {{baseUrl}}/api/v1/tickets/{{codigo}}/validar
+
+### 9. Validar codigo falso (debe dar 404 TIC-404)
+POST {{baseUrl}}/api/v1/tickets/codigo-falso/validar
