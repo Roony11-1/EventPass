@@ -3,7 +3,7 @@
 # El paso 7 es async (mensajería): si sale [], espera unos segundos y reenvía.
 @baseUrl = http://localhost:8080
 @password = 123456
-@eventoId = PEGAR_ID_DEL_EVENTO_DEL_PASO_3
+@eventoId = 1
 @ordenId = PEGAR_ID_DE_LA_ORDEN_DEL_PASO_4
 @ticketId = PEGAR_ID_DE_UN_TICKET_DEL_PASO_6
 
