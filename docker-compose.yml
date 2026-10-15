@@ -1,0 +1,106 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: ordenes-mongo
+    ports:
+      - "${MONGO_PORT:?Falta MONGO_PORT en .env}:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:?Falta MONGO_DATABASE en .env}
+    volumes:
+      - mongodb_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: ordenes-rabbit
+    ports:
+      - "${RABBITMQ_PORT:?Falta RABBITMQ_PORT en .env}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:?Falta RABBITMQ_MANAGEMENT_PORT en .env}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${SPRING_RABBITMQ_USERNAME:?Falta SPRING_RABBITMQ_USERNAME en .env}
+      RABBITMQ_DEFAULT_PASS: ${SPRING_RABBITMQ_PASSWORD:?Falta SPRING_RABBITMQ_PASSWORD en .env}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  postgres-auth:
+    image: postgres:16
+    container_name: eventpass-postgres-auth
+    ports:
+      - "${AUTH_DB_PORT:?Falta AUTH_DB_PORT en .env}:5432"
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME:?Falta AUTH_DB_NAME en .env}
+      POSTGRES_USER: ${AUTH_DB_USER:?Falta AUTH_DB_USER en .env}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:?Falta AUTH_DB_PASSWORD en .env}
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+
+  postgres-eventos:
+    image: postgres:16
+    container_name: eventpass-postgres-eventos
+    ports:
+      - "${EVENTOS_DB_PORT:?Falta EVENTOS_DB_PORT en .env}:5432"
+    environment:
+      POSTGRES_DB: ${EVENTOS_DB_NAME:?Falta EVENTOS_DB_NAME en .env}
+      POSTGRES_USER: ${EVENTOS_DB_USER:?Falta EVENTOS_DB_USER en .env}
+      POSTGRES_PASSWORD: ${EVENTOS_DB_PASSWORD:?Falta EVENTOS_DB_PASSWORD en .env}
+    volumes:
+      - postgres_eventos_data:/var/lib/postgresql/data
+
+  ordenes-service:
+    build:
+      context: ./backend/ms-java21-springboot-ordenes-v1
+      dockerfile: Dockerfile
+    container_name: ordenes-service
+    ports:
+      - "${SERVER_PORT:?Falta SERVER_PORT en .env}:8080"
+    environment:
+      SERVER_PORT: ${SERVER_PORT:?Falta SERVER_PORT en .env}
+      SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI:?Falta SPRING_DATA_MONGODB_URI en .env}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME:?Falta SPRING_RABBITMQ_USERNAME en .env}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD:?Falta SPRING_RABBITMQ_PASSWORD en .env}
+    depends_on:
+      - mongodb
+      - rabbitmq
+
+  bff-auth-service:
+    build:
+      context: ./backend/bff-auth-service
+      dockerfile: Dockerfile
+    container_name: bff-auth-service
+    ports:
+      - "${BFF_AUTH_PORT:?Falta BFF_AUTH_PORT en .env}:8080"
+    environment:
+      SERVER_PORT: 8080
+      DB_HOST: postgres-auth
+      DB_PORT: 5432
+      DB_NAME: ${AUTH_DB_NAME:?Falta AUTH_DB_NAME en .env}
+      DB_USER: ${AUTH_DB_USER:?Falta AUTH_DB_USER en .env}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD:?Falta AUTH_DB_PASSWORD en .env}
+      JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en .env}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:?Falta JWT_EXPIRATION_MS en .env}
+    depends_on:
+      - postgres-auth
+
+  eventos-service:
+    build:
+      context: ./backend/eventos-service
+      dockerfile: Dockerfile
+    container_name: eventos-service
+    ports:
+      - "${EVENTOS_PORT:?Falta EVENTOS_PORT en .env}:8080"
+    environment:
+      SERVER_PORT: 8080
+      DB_HOST: postgres-eventos
+      DB_PORT: 5432
+      DB_NAME: ${EVENTOS_DB_NAME:?Falta EVENTOS_DB_NAME en .env}
+      DB_USER: ${EVENTOS_DB_USER:?Falta EVENTOS_DB_USER en .env}
+      DB_PASSWORD: ${EVENTOS_DB_PASSWORD:?Falta EVENTOS_DB_PASSWORD en .env}
+    depends_on:
+      - postgres-eventos
+
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+  postgres_auth_data:
+  postgres_eventos_data:
