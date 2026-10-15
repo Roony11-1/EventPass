@@ -20,6 +20,9 @@ public class TicketMongoAdapter implements ITicketRepository
     @Override
     public Ticket guardar(Ticket ticket)
     {
+        if (ticket.getId() != null)
+            return actualizar(ticket);
+
         TicketDocument d = new TicketDocument();
 
         d.codigo = ticket.getCodigo();
@@ -29,7 +32,25 @@ public class TicketMongoAdapter implements ITicketRepository
         d.estado = ticket.getEstado().name();
         d.createdAt = ticket.getCreatedAt();
         repository.persist(d);
-        
+
+        return aDominio(d);
+    }
+
+    private Ticket actualizar(Ticket ticket)
+    {
+        TicketDocument d = repository.findById(new ObjectId(ticket.getId()));
+
+        if (d == null)
+            throw new IllegalStateException("documento de ticket inexistente: " + ticket.getId());
+
+        d.codigo = ticket.getCodigo();
+        d.ordenId = ticket.getOrdenId();
+        d.eventoId = ticket.getEventoId();
+        d.tipoEntradaId = ticket.getTipoEntradaId();
+        d.estado = ticket.getEstado().name();
+        d.createdAt = ticket.getCreatedAt();
+        repository.update(d);
+
         return aDominio(d);
     }
 
@@ -54,6 +75,12 @@ public class TicketMongoAdapter implements ITicketRepository
     public List<Ticket> buscarPorOrden(String ordenId)
     {
         return repository.buscarPorOrden(ordenId).stream().map(this::aDominio).toList();
+    }
+
+    @Override
+    public Optional<Ticket> buscarPorCodigo(String codigo)
+    {
+        return repository.buscarPorCodigo(codigo).map(this::aDominio);
     }
 
     private Ticket aDominio(TicketDocument d)

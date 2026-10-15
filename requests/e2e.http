@@ -1,11 +1,9 @@
-# FLUJO REAL COMPLETO vía gateway. Variables manuales: corre cada paso y
-# pega los ids donde se indica. Compatible con cualquier cliente HTTP.
-# El paso 7 es async (mensajería): si sale [], espera unos segundos y reenvía.
 @baseUrl = http://localhost:8080
 @password = 123456
-@eventoId = 1
+@eventoId = PEGAR_ID_DEL_EVENTO_DEL_PASO_3
 @ordenId = PEGAR_ID_DE_LA_ORDEN_DEL_PASO_4
 @ticketId = PEGAR_ID_DE_UN_TICKET_DEL_PASO_6
+@codigo = PEGAR_CODIGO_DE_UN_TICKET_DEL_PASO_6
 
 ### 1. Registrar comprador (debe dar 201; si da 409 el email ya existe, usa otro)
 POST {{baseUrl}}/api/auth/registro
@@ -67,6 +65,12 @@ GET {{baseUrl}}/api/v1/tickets/{{ticketId}}
 
 ### 8. Orden EMITIDA con sus 3 ticketIds (200)
 GET {{baseUrl}}/api/v1/ordenes/{{ordenId}}
+
+### 8b. Validar ticket en puerta, rol STAFF (200 VALIDADO; pega un codigo del paso 6)
+POST {{baseUrl}}/api/v1/tickets/{{codigo}}/validar
+
+### 8c. Revalidar mismo codigo (409 TIC-409, posible doble ingreso)
+POST {{baseUrl}}/api/v1/tickets/{{codigo}}/validar
 
 ### 9. Evento con aforo descontado en 3 (200)
 GET {{baseUrl}}/api/eventos/{{eventoId}}
