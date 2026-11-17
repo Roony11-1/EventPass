@@ -1,6 +1,8 @@
 package io.github.roony11_1.tickets.infrastructure.messaging;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -11,9 +13,9 @@ import org.eclipse.microprofile.reactive.messaging.Metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.github.roony11_1.tickets.core.application.event.IOrdenCreadaProcesor;
 import io.github.roony11_1.tickets.core.application.event.OrdenCreadaEvent;
 import io.github.roony11_1.tickets.core.application.event.TicketsEmitidosEvent;
-import io.github.roony11_1.tickets.core.application.service.TicketService;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import io.smallrye.reactive.messaging.rabbitmq.OutgoingRabbitMQMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrdenCreadaConsumer
 {
-    private final TicketService ticketService;
+    private final IOrdenCreadaProcesor ordenCreadaProcesor;
     private final ObjectMapper objectMapper;
 
     @Inject
@@ -35,41 +37,45 @@ public class OrdenCreadaConsumer
     @Blocking
     public CompletionStage<Void> consumir(Message<byte[]> mensaje)
     {
-        final OrdenCreadaEvent evento;
+        var evento = deserialize(mensaje);
 
-        try
-        {
-            evento = objectMapper.readValue(mensaje.getPayload(), OrdenCreadaEvent.class);
-        }
-        catch (Exception e)
-        {
-            return mensaje.ack();
-        }
+        if (!evento.isPresent())
+            return mensaje.nack(null);
 
-        var existentes = ticketService.buscarPorOrden(evento.ordenId());
-        if (!existentes.isEmpty())
-        {
-            publicar(evento.ordenId(), existentes.stream().map(t -> t.getId()).toList());
+        var emitidos = ordenCreadaProcesor.procesar(evento.get());
 
-            return mensaje.ack();
-        }
+        if (emitidos.isEmpty())
+            return mensaje.nack(null);
 
-        var emitidos = ticketService.emitirTickets(evento);
+        OrdenCreadaEvent ordenCreada = evento.get();
 
-        publicar(evento.ordenId(), emitidos.stream().map(t -> t.getId()).toList());
+        publicar(ordenCreada.ordenId(), emitidos.stream().map(t -> t.getId()).toList());
 
         return mensaje.ack();
     }
 
-    private void publicar(String ordenId, java.util.List<String> ticketIds)
+    private Optional<OrdenCreadaEvent> deserialize(Message<byte[]> message)
+    {
+        try
+        {
+            var event = objectMapper.readValue(message.getPayload(), OrdenCreadaEvent.class);
+
+            return Optional.of(event);
+        }
+        catch (Exception e)
+        {
+            return Optional.empty();
+        }
+    }
+
+    private void publicar(String ordenId, List<String> ticketIds)
     {
         var metadata = Metadata.of(OutgoingRabbitMQMetadata.builder()
             .withRoutingKey("tickets.emitidos")
             .withContentType("application/json")
             .build());
 
-        emitter.send(Message.of(
-            new TicketsEmitidosEvent(ordenId, ticketIds, Instant.now()), metadata));
+        emitter.send(Message.of(new TicketsEmitidosEvent(ordenId, ticketIds, Instant.now()), metadata));
     }
 
 }
