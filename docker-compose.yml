@@ -1,3 +1,4 @@
+name: eventpass
 services:
   mongodb:
     image: mongo:7

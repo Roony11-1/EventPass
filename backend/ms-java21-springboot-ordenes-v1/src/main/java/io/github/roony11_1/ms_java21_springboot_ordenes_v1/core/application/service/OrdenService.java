@@ -2,18 +2,16 @@ package io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.application.ser
 
 import java.util.List;
 
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import feign.FeignException;
+import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.application.event.IOrdenEventPublisher;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.application.event.OrdenCreadaEvent;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.application.event.OrdenCreadaEvent.ItemCreado;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.ConflictoOptimistaException;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.EventoNoEncontradoException;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.EventosNoDisponibleException;
-import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.MensajeriaNoDisponibleException;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.OrdenNoEncontradaException;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.exception.StockInsuficienteException;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.models.ItemOrden;
@@ -22,10 +20,7 @@ import io.github.roony11_1.ms_java21_springboot_ordenes_v1.core.domain.repositor
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.infrastructure.client.EventoReservaRequest;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.infrastructure.client.EventoReservaResponse;
 import io.github.roony11_1.ms_java21_springboot_ordenes_v1.infrastructure.client.EventosClient;
-import io.github.roony11_1.ms_java21_springboot_ordenes_v1.infrastructure.config.RabbitConfig;
 import lombok.RequiredArgsConstructor;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +28,7 @@ public class OrdenService
 {
     private final IOrdenRepository ordenRepository;
     private final EventosClient eventosClient;
-    private final RabbitTemplate rabbitTemplate;
-    private final JsonMapper jsonMapper;
+    private final IOrdenEventPublisher ordenEventPublisher;
 
     public Orden crear(Long eventoId, Long compradorId, List<ItemOrden> items)
     {
@@ -130,19 +124,6 @@ public class OrdenService
                 .toList(),
             orden.getCreatedAt());
 
-        try
-        {
-            String payload = jsonMapper.writeValueAsString(evento);
-            rabbitTemplate.convertAndSend(
-                RabbitConfig.EXCHANGE, RabbitConfig.RK_ORDEN_CREADA, payload,
-                mensaje -> {
-                    mensaje.getMessageProperties().setContentType("application/json");
-                    return mensaje;
-                });
-        }
-        catch (JacksonException | AmqpException e)
-        {
-            throw new MensajeriaNoDisponibleException("no se pudo publicar orden.creada de " + orden.getId(), e);
-        }
+        ordenEventPublisher.publicarOrdenCreada(evento);
     }
 }
