@@ -1,0 +1,47 @@
+quarkus:
+  application:
+    name: tickets-worker
+  http:
+    # El worker no expone API HTTP; solo health/metrics en el puerto de management.
+    host-enabled: false
+  management:
+    enabled: true
+    port: 9000
+  mongodb:
+    connection-string: ${MONGODB_URI}
+    database: eventpass_tickets
+  jackson:
+    serialization-inclusion: NON_NULL
+  shutdown:
+    timeout: 30s
+
+mp:
+  messaging:
+    incoming:
+      ordenes-creada:
+        connector: smallrye-rabbitmq
+        host: ${RABBITMQ_HOST}
+        port: ${RABBITMQ_PORT}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+        exchange:
+          name: eventpass
+          type: topic
+          durable: true
+        queue:
+          name: q.tickets.ordenes-creadas
+          durable: true
+        routing-keys: orden.creada
+        auto-acknowledgement: false
+    outgoing:
+      tickets-emitidos:
+        connector: smallrye-rabbitmq
+        host: ${RABBITMQ_HOST}
+        port: ${RABBITMQ_PORT}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+        exchange:
+          name: eventpass
+          type: topic
+          durable: true
+        routing-keys: tickets.emitidos

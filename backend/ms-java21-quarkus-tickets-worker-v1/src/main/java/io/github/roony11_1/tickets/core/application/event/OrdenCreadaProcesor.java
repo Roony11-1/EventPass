@@ -18,8 +18,9 @@ public class OrdenCreadaProcesor implements IOrdenCreadaProcesor
     {
         var existentes = ticketService.buscarPorOrden(ordenCreadaEvent.ordenId());
 
-        if (existentes.isEmpty())
-            return List.of();
+        // Idempotencia básica: si la orden ya tiene tickets, no se vuelven a emitir.
+        if (!existentes.isEmpty())
+            return existentes;
 
         return ticketService.emitirTickets(ordenCreadaEvent);
     }
