@@ -49,11 +49,6 @@
 
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-mongodb-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-mongodb-panache</artifactId>
         </dependency>
 
@@ -65,12 +60,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-config-yaml</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.roony11-1</groupId>
-            <artifactId>roony-error-core</artifactId>
-            <version>1.0.0</version>
         </dependency>
 
         <dependency>

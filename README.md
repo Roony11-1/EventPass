@@ -12,7 +12,8 @@ hablan entre sí por la red interna de Docker.
 | `ms-java21-springboot-ordenes-v1` | Spring Boot 4.1 + Feign + AMQP | MongoDB | interno |
 | `bff-auth-service` | Spring Boot 4.1 + JWT propio | Postgres `eventpass_auth` | interno |
 | `eventos-service` | Spring Boot 4.1 + JPA | Postgres `eventpass_eventos` | interno |
-| `ms-java21-quarkus-tickets-v1` | Quarkus 3.40 (JVM) + Reactive Messaging | MongoDB `eventpass_tickets` | interno |
+| `ms-java21-quarkus-tickets-v1` | Quarkus 3.40 (JVM) + REST | MongoDB `eventpass_tickets` | interno |
+| `ms-java21-quarkus-tickets-worker-v1` | Quarkus 3.40 (JVM en compose, nativo en GHA) + Reactive Messaging | MongoDB `eventpass_tickets` + RabbitMQ | interno |
 
 Flujo principal: `POST /api/v1/ordenes` → reserva de aforo en eventos (Feign)
 → `orden.creada` (RabbitMQ) → tickets emite 1 ticket por unidad →
@@ -30,7 +31,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Eso levanta las 4 BDs/colas + los 5 servicios. El API queda en
+Eso levanta las 4 BDs/colas + los 6 servicios. El API queda en
 `http://localhost:8080`:
 
 - `POST /api/auth/registro`, `POST /api/auth/login`
@@ -61,6 +62,10 @@ cd backend/gateway-service && ./mvnw test
 
 Toda la configuración va por variables de entorno (ver `.env.example`);
 sin `.env` completo el compose falla en seco en vez de levantar a medias.
+
+`tickets-worker` corre en JVM dentro de compose. La imagen nativa
+(`backend/ms-java21-quarkus-tickets-worker-v1/Dockerfile.native`) queda para
+el publisher nativo de GitHub Actions.
 
 ## Ramas
 

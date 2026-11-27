@@ -1,9 +1,9 @@
 @baseUrl = http://localhost:8080
 @password = 123456
-@eventoId = PEGAR_ID_DEL_EVENTO_DEL_PASO_3
-@ordenId = PEGAR_ID_DE_LA_ORDEN_DEL_PASO_4
-@ticketId = PEGAR_ID_DE_UN_TICKET_DEL_PASO_6
-@codigo = PEGAR_CODIGO_DE_UN_TICKET_DEL_PASO_6
+@eventoId = 11
+@ordenId = 6b08ffc77a32d0be2057f046
+@ticketId = 6b08ffc887a15b54c3362848
+@codigo = 9ed5c3d5-337b-455e-8fc4-2d4011d93ebb
 
 ### 1. Registrar comprador (debe dar 201; si da 409 el email ya existe, usa otro)
 POST {{baseUrl}}/api/auth/registro

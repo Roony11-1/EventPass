@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 import io.github.roony11_1.tickets.core.domain.exception.TicketInvalidoException;
-import io.github.roony11_1.tickets.core.domain.exception.TransicionEstadoNoPermitidaException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

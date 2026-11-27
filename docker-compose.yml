@@ -117,10 +117,21 @@ services:
     environment:
       SERVER_PORT: 8080
       MONGODB_URI: ${MONGODB_URI}
+    depends_on:
+      - mongodb
+
+  tickets-worker:
+    build:
+      context: ./backend/ms-java21-quarkus-tickets-worker-v1
+      dockerfile: Dockerfile
+    container_name: tickets-worker
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD}
+      WORKER_MANAGEMENT_PORT: 9000
     depends_on:
       - mongodb
       - rabbitmq

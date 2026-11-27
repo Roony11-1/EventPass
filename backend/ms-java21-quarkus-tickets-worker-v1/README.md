@@ -16,7 +16,9 @@ No tiene API HTTP ni pruebas unitarias. Solo health en `:9000/q/health`.
 ./mvnw quarkus:dev
 ```
 
-Variables: `MONGODB_URI`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`.
+Variables: `MONGODB_URI`, `MONGODB_DATABASE` (default `eventpass_tickets`),
+`RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`
+y `WORKER_MANAGEMENT_PORT` (default `9000`).
 
 ## Build
 
@@ -25,8 +27,14 @@ Variables: `MONGODB_URI`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME`,
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
+## Docker
+
+- `Dockerfile`: imagen JVM usada por `docker-compose.yml`.
+- `Dockerfile.native`: build nativo con Mandrel, pensado para el publisher
+  nativo de GitHub Actions.
+
 ## Nota
 
-El servicio original `ms-java21-quarkus-tickets-v1` **todavía consume la misma cola**.
-Si levantas ambos, se reparten los mensajes. Para probar solo este worker,
-detén el `tickets-service` o quita su `@Incoming` / dependencia de Rabbit.
+El servicio `ms-java21-quarkus-tickets-v1` ya **no consume la cola**: solo expone
+la API REST de consulta/validación. Este worker es el único consumidor de
+`q.tickets.ordenes-creadas` y el único que publica en `tickets.emitidos`.

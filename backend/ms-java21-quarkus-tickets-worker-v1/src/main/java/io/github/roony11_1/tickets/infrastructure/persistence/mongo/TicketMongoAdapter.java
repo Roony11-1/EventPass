@@ -1,9 +1,6 @@
 package io.github.roony11_1.tickets.infrastructure.persistence.mongo;
 
 import java.util.List;
-import java.util.Optional;
-
-import org.bson.types.ObjectId;
 
 import io.github.roony11_1.tickets.core.domain.models.Ticket;
 import io.github.roony11_1.tickets.core.domain.models.TicketEstado;
@@ -11,14 +8,14 @@ import io.github.roony11_1.tickets.core.domain.repository.ITicketRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
-@ApplicationScoped 
-@RequiredArgsConstructor 
+@ApplicationScoped
+@RequiredArgsConstructor
 public class TicketMongoAdapter implements ITicketRepository
 {
     private final TicketMongoRepository repository;
 
     @Override
-    public void guardar(Ticket ticket)
+    public Ticket guardar(Ticket ticket)
     {
         TicketDocument d = new TicketDocument();
 
@@ -30,5 +27,20 @@ public class TicketMongoAdapter implements ITicketRepository
         d.createdAt = ticket.getCreatedAt();
 
         repository.persist(d);
+
+        return aDominio(d);
+    }
+
+    @Override
+    public List<Ticket> buscarPorOrden(String ordenId)
+    {
+        return repository.buscarPorOrden(ordenId).stream().map(this::aDominio).toList();
+    }
+
+    private Ticket aDominio(TicketDocument d)
+    {
+        return Ticket.rehidratar(
+            d.id.toString(), d.codigo, d.ordenId, d.eventoId,
+            d.tipoEntradaId, TicketEstado.valueOf(d.estado), d.createdAt);
     }
 }

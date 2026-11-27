@@ -5,10 +5,7 @@ import java.util.stream.IntStream;
 
 import io.github.roony11_1.tickets.core.application.event.OrdenCreadaEvent;
 import io.github.roony11_1.tickets.core.domain.exception.TicketInvalidoException;
-import io.github.roony11_1.tickets.core.domain.exception.TicketNoEncontradoException;
-import io.github.roony11_1.tickets.core.domain.exception.TicketYaUtilizadoException;
 import io.github.roony11_1.tickets.core.domain.models.Ticket;
-import io.github.roony11_1.tickets.core.domain.models.TicketEstado;
 import io.github.roony11_1.tickets.core.domain.repository.ITicketRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +15,11 @@ import lombok.RequiredArgsConstructor;
 public class TicketService
 {
     private final ITicketRepository ticketRepository;
+
+    public List<Ticket> buscarPorOrden(String ordenId)
+    {
+        return ticketRepository.buscarPorOrden(ordenId);
+    }
 
     public List<Ticket> emitirTickets(OrdenCreadaEvent evento)
     {

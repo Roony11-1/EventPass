@@ -6,24 +6,26 @@ quarkus:
     host-enabled: false
   management:
     enabled: true
-    port: 9000
+    port: ${WORKER_MANAGEMENT_PORT:9000}
   mongodb:
-    connection-string: ${MONGODB_URI}
-    database: eventpass_tickets
+    connection-string: ${MONGODB_URI:mongodb://localhost:27017/eventpass_tickets}
+    database: ${MONGODB_DATABASE:eventpass_tickets}
   jackson:
     serialization-inclusion: NON_NULL
   shutdown:
     timeout: 30s
+
+# Conexión RabbitMQ compartida por los canales de entrada y salida.
+rabbitmq-host: ${RABBITMQ_HOST:localhost}
+rabbitmq-port: ${RABBITMQ_PORT:5672}
+rabbitmq-username: ${RABBITMQ_USERNAME:guest}
+rabbitmq-password: ${RABBITMQ_PASSWORD:guest}
 
 mp:
   messaging:
     incoming:
       ordenes-creada:
         connector: smallrye-rabbitmq
-        host: ${RABBITMQ_HOST}
-        port: ${RABBITMQ_PORT}
-        username: ${RABBITMQ_USERNAME}
-        password: ${RABBITMQ_PASSWORD}
         exchange:
           name: eventpass
           type: topic
@@ -36,12 +38,8 @@ mp:
     outgoing:
       tickets-emitidos:
         connector: smallrye-rabbitmq
-        host: ${RABBITMQ_HOST}
-        port: ${RABBITMQ_PORT}
-        username: ${RABBITMQ_USERNAME}
-        password: ${RABBITMQ_PASSWORD}
         exchange:
           name: eventpass
           type: topic
           durable: true
-        routing-keys: tickets.emitidos
+        # La routing key viaja en los metadatos del mensaje (OutgoingRabbitMQMetadata).
