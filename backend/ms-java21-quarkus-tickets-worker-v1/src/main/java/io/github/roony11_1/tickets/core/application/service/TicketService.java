@@ -7,6 +7,7 @@ import io.github.roony11_1.tickets.core.application.event.OrdenCreadaEvent;
 import io.github.roony11_1.tickets.core.domain.exception.TicketInvalidoException;
 import io.github.roony11_1.tickets.core.domain.models.Ticket;
 import io.github.roony11_1.tickets.core.domain.repository.ITicketRepository;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
@@ -16,19 +17,27 @@ public class TicketService
 {
     private final ITicketRepository ticketRepository;
 
-    public List<Ticket> buscarPorOrden(String ordenId)
+    public Uni<List<Ticket>> buscarPorOrden(String ordenId)
     {
         return ticketRepository.buscarPorOrden(ordenId);
     }
 
-    public List<Ticket> emitirTickets(OrdenCreadaEvent evento)
+    public Uni<List<Ticket>> emitirTickets(OrdenCreadaEvent evento)
     {
         validar(evento);
 
-        return evento.items().stream()
+        var operaciones = evento.items().stream()
             .flatMap(item -> IntStream.range(0, item.cantidad())
-                .mapToObj(i -> ticketRepository.guardar(Ticket.crear(evento.ordenId(), evento.eventoId(), item.tipoEntradaId()))))
+                .mapToObj(i -> ticketRepository.guardar(
+                    Ticket.crear(
+                        evento.ordenId(),
+                        evento.eventoId(),
+                        item.tipoEntradaId()
+                    )
+                )))
             .toList();
+
+        return Uni.join().all(operaciones).andCollectFailures();
     }
 
     private void validar(OrdenCreadaEvent evento)

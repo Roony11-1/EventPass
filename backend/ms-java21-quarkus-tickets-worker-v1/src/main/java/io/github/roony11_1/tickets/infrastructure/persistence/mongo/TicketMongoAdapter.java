@@ -5,6 +5,7 @@ import java.util.List;
 import io.github.roony11_1.tickets.core.domain.models.Ticket;
 import io.github.roony11_1.tickets.core.domain.models.TicketEstado;
 import io.github.roony11_1.tickets.core.domain.repository.ITicketRepository;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +16,7 @@ public class TicketMongoAdapter implements ITicketRepository
     private final TicketMongoRepository repository;
 
     @Override
-    public Ticket guardar(Ticket ticket)
+    public Uni<Ticket> guardar(Ticket ticket)
     {
         TicketDocument d = new TicketDocument();
 
@@ -28,13 +29,17 @@ public class TicketMongoAdapter implements ITicketRepository
 
         repository.persist(d);
 
-        return aDominio(d);
+        return repository.persist(d)
+            .map(this::aDominio);
     }
 
     @Override
-    public List<Ticket> buscarPorOrden(String ordenId)
+    public Uni<List<Ticket>> buscarPorOrden(String ordenId)
     {
-        return repository.buscarPorOrden(ordenId).stream().map(this::aDominio).toList();
+        return repository.buscarPorOrden(ordenId)
+            .map(tickets -> tickets.stream()
+                .map(this::aDominio)
+                .toList());
     }
 
     private Ticket aDominio(TicketDocument d)
